@@ -9,6 +9,10 @@ using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using SimpleStoreApp.Database.DB.Interface;
+using SimpleStoreApp.Database.DB.Implementation;
+using SimpleStoreApp.Database.Mappers.User.Implementation;
+using SimpleStoreApp.Database.Mappers.User.Interface;
 
 namespace SimpleStoreApp
 {
@@ -16,10 +20,10 @@ namespace SimpleStoreApp
     {
         public Startup(IConfiguration configuration)
         {
-            Configuration = configuration;
+            Configuration = configuration;            
         }
 
-        public IConfiguration Configuration { get; }
+        public IConfiguration Configuration { get; }      
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -29,10 +33,11 @@ namespace SimpleStoreApp
                 // This lambda determines whether user consent for non-essential cookies is needed for a given request.
                 options.CheckConsentNeeded = context => true;
                 options.MinimumSameSitePolicy = SameSiteMode.None;
-            });
+            });            
 
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);            
 
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            this.register(services);            
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -40,7 +45,7 @@ namespace SimpleStoreApp
         {
             if (env.IsDevelopment())
             {
-                app.UseDeveloperExceptionPage();
+                app.UseDeveloperExceptionPage();                
             }
             else
             {
@@ -52,7 +57,13 @@ namespace SimpleStoreApp
             app.UseStaticFiles();
             app.UseCookiePolicy();
 
-            app.UseMvc();
+            app.UseMvc();            
+        }
+
+        public void register(IServiceCollection services)
+        {
+            services.AddSingleton<IDatabase, OracleDatabase>();
+            services.AddSingleton<IUserMapper, UserMapper>();
         }
     }
 }
